@@ -6,7 +6,7 @@ Ce projet a pour but de proposer une API facilement requêtable et présentant l
 
     git clone http://git.enpc.org/ki/emploidutemps-api.git emploidutemps-api
     cd emploidutemps-api
-    virtualenv env
+    virtualenv --python=/usr/bin/python3 env
     source env/bin/activate
     
     pip install -r requirements.txt
