@@ -1,10 +1,13 @@
 __author__ = 'mickael'
+import datetime
 import requests
 import re
+import sqlalchemy
 from bs4 import BeautifulSoup
+from lib.model import Course
 
 
-class EdtScraper:
+class EdtScraper(object):
 
     def __init__(self, base_url):
         self.base_url = base_url
@@ -23,6 +26,7 @@ class EdtScraper:
 
         for course in courses:
             course_data = self.__process_course_tag(course)
+
             print("Found course : %s" % course_data)
             course_list.append(course_data)
 
@@ -30,9 +34,14 @@ class EdtScraper:
 
     def __process_course_tag(self, course_tag):
         """ Parse a span tag """
-        course = dict()
+        course = Course()
 
-        course['link'] = course_tag.find('a')['href']
+        course.link = course_tag.find('a')['href']
+
+        # Detect course ID
+        expr = re.search('index_mobile\.php\?id=(\d+)&code_departement=.*&mydate=([0-9/]+)', course.link)
+        course.id = expr.group(1)
+        course.date = datetime.datetime.strptime(expr.group(2), '%d/%m/%Y').date()
 
         for span_tag in course_tag.find_all('span'):
 
@@ -43,19 +52,20 @@ class EdtScraper:
                 # First field : time of beginning / end of the courses
                 # <br><b>08:30<br>11:45</br>
                 expr = re.search('<br><b>([0-9]{2}:[0-9]{2})<br>([0-9]{2}:[0-9]{2})</b', str(span_tag))
-                course['time_begin'] = expr.group(1)
-                course['time_end'] = expr.group(2)
+                time_format = '%H:%M'
+                course.time_begin = datetime.datetime.strptime(expr.group(1), time_format).time()
+                course.time_end = datetime.datetime.strptime(expr.group(2), time_format).time()
             elif type == 'comment':
                 # Second field : department and place
                 expr = re.search('(.*) : (.*)', span_tag.text)
-                course['department'] = expr.group(1)
-                course['place'] = expr.group(2)
+                course.department = expr.group(1)
+                course.place = expr.group(2)
             elif type == 'name':
                 # Third field : name
-                course['name'] = span_tag.text
+                course.name = span_tag.text
             elif type == 'starcomment':
                 # Fourth field : comment
-                course['comment'] = span_tag.text
+                course.comment = span_tag.text
             elif type == 'arrow':
                 # Nothing to do
                 pass
@@ -70,3 +80,13 @@ if __name__ == '__main__':
     scrapper = EdtScraper('http://emploidutemps.enpc.fr/index_mobile.php')
     course_list = scrapper.run()
     print("Found %d courses !" % len(course_list))
+
+    # Registering them
+    from sqlalchemy.orm import scoped_session, sessionmaker
+    engine = sqlalchemy.create_engine("sqlite:///test.db")
+    session = scoped_session(sessionmaker(bind=engine))
+
+    for course in course_list:
+        session.merge(course)
+
+    session.commit()
