@@ -19,6 +19,9 @@ class EdtScraper(object):
                 or 'Une erreur est survenue, merci de nous contacter ' in response.text:
             raise Exception("Unable to fetch the page !")
 
+        # Well, this seems to be necessary
+        response.encoding = 'utf-8'
+
         root_html = BeautifulSoup(response.text)
         courses = root_html.find(id='content').find('ul', recursive=False)
 
