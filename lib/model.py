@@ -26,9 +26,9 @@ class Course(db.Model):
             'comment': self.comment,
             'department': self.department,
             'place': self.place,
-            'date': str(self.date), # TODO
-            'time_begin': str(self.time_begin),  # TODO
-            'time_end': str(self.time_end),  # TODO
+            'date': self.date.isoformat(),
+            'time_begin': self.time_begin.isoformat(),
+            'time_end': self.time_end.isoformat(),
             'link': self.link,
         }
 

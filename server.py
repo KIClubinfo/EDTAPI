@@ -2,6 +2,7 @@ __author__ = 'mickael'
 from flask import Flask
 from flask import render_template
 from flask.ext.restful import Api
+from flask.ext.cors import CORS
 from flask_restful_swagger import swagger
 from utils import catch_exceptions
 import config
@@ -9,6 +10,9 @@ import config
 # Flask application
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URL
+
+# Cross Domain
+cors = CORS(app, resources={r"/*": {"origins": "*"}}, headers=['Content-Type', 'X-Requested-With', 'Authorization'])
 
 from lib.model import db
 db.init_app(app)

@@ -88,4 +88,4 @@ class CourseAPI(Resource):
         # Format it
         course_list = [course.__toJSON__() for course in courses]
 
-        return course_list, 200, {'Access-Control-Allow-Origin': '*'}
+        return course_list, 200
