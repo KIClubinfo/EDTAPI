@@ -54,7 +54,11 @@ class EdtScraper(object):
             if type == 'image':
                 # First field : time of beginning / end of the courses
                 # <br><b>08:30<br>11:45</br>
-                expr = re.search('<br><b>([0-9]{2}:[0-9]{2})<br>([0-9]{2}:[0-9]{2})</b', str(span_tag))
+                expr = re.search('<br/?><b>([0-9]{2}:[0-9]{2})<br>([0-9]{2}:[0-9]{2})</b', str(span_tag))
+                if not expr:
+                    print("Unable to find hours in %s !" % span_tag)
+                    continue
+
                 time_format = '%H:%M'
                 course.time_begin = datetime.datetime.strptime(expr.group(1), time_format).time()
                 course.time_end = datetime.datetime.strptime(expr.group(2), time_format).time()
