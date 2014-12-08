@@ -1,5 +1,6 @@
 __author__ = 'mickael'
 from flask.ext.sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 from sqlalchemy.sql.sqltypes import Integer, Text, Date, Time
 
@@ -27,8 +28,8 @@ class Course(db.Model):
             'department': self.department,
             'place': self.place,
             'date': self.date.isoformat(),
-            'time_begin': self.time_begin.isoformat(),
-            'time_end': self.time_end.isoformat(),
+            'time_begin': datetime.combine(self.date, self.time_begin).isoformat(),
+            'time_end': datetime.combine(self.date, self.time_end).isoformat(),
             'link': self.link,
         }
 
