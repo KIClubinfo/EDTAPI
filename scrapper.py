@@ -13,8 +13,11 @@ class EdtScraper(object):
     def __init__(self, base_url):
         self.base_url = base_url
 
-    def run(self):
-        response = requests.get(self.base_url)
+    def run(self, date=None):
+        """ Download, parse, and return the list of courses for the given date """
+
+        params = '?mydate={:%d/%m/%Y}'.format(date) if date else ''
+        response = requests.get(self.base_url + params)
 
         if not response or response.status_code != 200\
                 or 'Une erreur est survenue, merci de nous contacter ' in response.text:
@@ -86,15 +89,26 @@ class EdtScraper(object):
 if __name__ == '__main__':
     # Lancement en ligne de commande
     scrapper = EdtScraper(config.EDT_URL)
-    course_list = scrapper.run()
-    print("Found %d courses !" % len(course_list))
+
+    course_list_total = []
+    today = datetime.datetime.today()
+    # From 2 days ago to 8 days in the future
+    for deltadays in range(-2, 9):
+        current_date = today + datetime.timedelta(days=deltadays)
+        # Retrieve the courses
+        course_list = scrapper.run(current_date)
+        print("Found {} courses for {:%d/%m/%Y} !".format(len(course_list), current_date))
+        # Add them to the final list
+        course_list_total.extend(course_list)
+
+    print("Total : {} courses".format(len(course_list_total)))
 
     # Registering them
     from sqlalchemy.orm import scoped_session, sessionmaker
     engine = sqlalchemy.create_engine(config.DB_URL)
     session = scoped_session(sessionmaker(bind=engine))
 
-    for course in course_list:
+    for course in course_list_total:
         session.merge(course)
 
     session.commit()
