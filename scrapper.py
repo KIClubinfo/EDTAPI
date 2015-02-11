@@ -5,6 +5,7 @@ import re
 import sqlalchemy
 from bs4 import BeautifulSoup
 from lib.model import Course
+import config
 
 
 class EdtScraper(object):
@@ -84,13 +85,13 @@ class EdtScraper(object):
 
 if __name__ == '__main__':
     # Lancement en ligne de commande
-    scrapper = EdtScraper('http://emploidutemps.enpc.fr/index_mobile.php')
+    scrapper = EdtScraper(config.EDT_URL)
     course_list = scrapper.run()
     print("Found %d courses !" % len(course_list))
 
     # Registering them
     from sqlalchemy.orm import scoped_session, sessionmaker
-    engine = sqlalchemy.create_engine("sqlite:///test.db")
+    engine = sqlalchemy.create_engine(config.DB_URL)
     session = scoped_session(sessionmaker(bind=engine))
 
     for course in course_list:
