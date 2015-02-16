@@ -3,6 +3,7 @@ from flask.ext.restful import Resource
 from flask_restful_swagger import swagger
 from .model import Course
 from utils import parse_args_from_swagger, catch_exceptions
+from utils import parse_date
 
 
 class CourseAPI(Resource):
@@ -63,7 +64,7 @@ class CourseAPI(Resource):
         """ Return the courses matching your result """
 
         # Parameters
-        date = args['date']
+        date = parse_date(args['date'])
         department = args['department']
         place = args['place']
         comment = args['comment']

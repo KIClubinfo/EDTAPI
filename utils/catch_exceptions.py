@@ -16,7 +16,6 @@ def catch_exceptions(f):
         try:
             return_value = f(*args, **kwargs)
 
-        # We only catch defined exceptions
         except Exception as e:
 
             # We add the exception name
