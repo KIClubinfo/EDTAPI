@@ -84,7 +84,7 @@ class CourseAPI(Resource):
             courses = courses.filter_by(department=comment)
 
         # Do the query
-        courses = courses.limit(1000).all()
+        courses = courses.order_by(Course.time_begin).limit(1000).all()
 
         # Format it
         course_list = [course.__toJSON__() for course in courses]
