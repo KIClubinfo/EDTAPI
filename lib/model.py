@@ -1,10 +1,12 @@
 __author__ = 'mickael'
 from flask.ext.sqlalchemy import SQLAlchemy
 from datetime import datetime
+import pytz
 
 from sqlalchemy.sql.sqltypes import Integer, Text, Date, Time
 
 db = SQLAlchemy()
+tz = pytz.timezone('Europe/Paris')
 
 
 class Course(db.Model):
@@ -28,10 +30,17 @@ class Course(db.Model):
             'department': self.department,
             'place': self.place,
             'date': self.date.isoformat(),
-            'time_begin': datetime.combine(self.date, self.time_begin).isoformat(),
-            'time_end': datetime.combine(self.date, self.time_end).isoformat(),
+            'time_begin': self.__combine_iso(self.date, self.time_begin),
+            'time_end': self.__combine_iso(self.date, self.time_end),
             'link': self.link,
         }
+
+    @staticmethod
+    def __combine_iso(date, time):
+        """ Combine a local date and time and make it TZ aware """
+        return tz.localize(
+            datetime.combine(date, time)
+        ).isoformat()
 
     def __repr__(self):
         return "<Course %s for %s at %s (%s %s)>" % \

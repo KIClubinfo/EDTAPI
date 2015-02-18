@@ -61,10 +61,10 @@ class CourseAPI(Resource):
     @catch_exceptions
     @parse_args_from_swagger(parameters)
     def get(self, args):
-        """ Return the courses matching your result """
+        """ Return the courses matching your query """
 
         # Parameters
-        date = parse_date(args['date'])
+        date_string = args['date']
         department = args['department']
         place = args['place']
         comment = args['comment']
@@ -73,8 +73,8 @@ class CourseAPI(Resource):
         courses = Course.query
 
         # Apply filters
-        if date:
-            courses = courses.filter_by(date=date)
+        if date_string:
+            courses = courses.filter_by(date=parse_date(date_string))
         if place:
             courses = courses.filter_by(place=place)
         if department:
